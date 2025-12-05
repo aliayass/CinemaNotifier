@@ -6,7 +6,7 @@ Bir sinemasever olarak Elazığ'da üniversite okumanın kendine has zorlukları
 "Bunu kaçırmamam lazım!" dediğim filmleri bir daha ıskalamamak için bu projeyi geliştirdim. Artık vizyonu sürekli takip etmeme gerek yok; bu bot benim yerime her gün kontrol ediyor ve Elazığ'a gelen filmleri bana bildiriyor. 🍿
 
 ## 🚀 Ne Yapıyor?
-Bu bot, `sinemalar.com` üzerinden özellikle **Elazığ Cinepoint (Elysium Park)** sinemasını tarar.
+Bu bot, `boxofficeturkiye.com` üzerinden özellikle **Elazığ Cinepoint (Elysium Park)** sinemasını tarar.
 - **Otomatik Kontrol:** Her gün öğlen **12:00** ve **16:00**'da vizyondaki filmleri kontrol eder.
 - **Anında Bildirim:** Bulduğu film listesini Telegram üzerinden anında cebime gönderir.
 - **Açılış Kontrolü:** Bot çalıştırıldığı an dahi bir kontrol yapıp durum raporu verir.

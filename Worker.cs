@@ -46,14 +46,14 @@ public class Worker : BackgroundService
 
         if (movies.Any())
         {
-            var message = $"📢 <b>Elazığ'da Vizyondaki Filmler ({DateTime.Now:dd.MM.yyyy HH:mm}):</b>\n\n" + string.Join("\n", movies.Select(m => $"• {m}"));
+            var message = $"📢 Elazığ'da Vizyondaki Filmler ({DateTime.Now:dd.MM.yyyy HH:mm}):\n\n" + string.Join("\n", movies.Select(m => $"• {m}"));
             await _telegramService.SendNotificationAsync(message);
         }
         else
         {
             _logger.LogInformation("Elazığ'da film bulunamadı.");
             // Notify user even if empty, so they verify it works
-            await _telegramService.SendNotificationAsync($"ℹ️ <b>Bilgi:</b> Şu an Elazığ'da vizyonda herhangi bir film bulunamadı ({DateTime.Now:HH:mm}).");
+            await _telegramService.SendNotificationAsync($"ℹ️ Bilgi: Şu an Elazığ'da vizyonda herhangi bir film bulunamadı ({DateTime.Now:HH:mm}).");
         }
     }
 

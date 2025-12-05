@@ -1,4 +1,5 @@
 using HtmlAgilityPack;
+using System.Text;
 
 namespace CinemaNotifier.Worker;
 
@@ -6,7 +7,7 @@ public class MovieService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<MovieService> _logger;
-    private const string BaseUrl = "https://www.sinemalar.com";
+    private const string BaseUrl = "https://boxofficeturkiye.com";
 
     public MovieService(ILogger<MovieService> logger)
     {
@@ -18,11 +19,11 @@ public class MovieService
 
     public async Task<List<string>> GetMoviesInElazigAsync()
     {
-        var foundMovies = new HashSet<string>();
+        var foundMovies = new List<string>();
         try
         {
-            // Target specific cinema
-            var cinemaUrl = "https://www.sinemalar.com/sinemasalonu/2231/elazig-cinepoint-elysium-park";
+            // Target specific cinema page on BoxOfficeTurkiye
+            var cinemaUrl = "https://boxofficeturkiye.com/sinema/elazig-cinepoint-elysium-park--745";
             _logger.LogInformation($"Sinema kontrol ediliyor: {cinemaUrl}");
 
             try 
@@ -31,19 +32,66 @@ public class MovieService
                 var cinemaDoc = new HtmlDocument();
                 cinemaDoc.LoadHtml(cinemaHtml);
 
-                var movieNodes = cinemaDoc.DocumentNode.SelectNodes("//a[contains(@href, '/film/')]");
+                var movieNodes = cinemaDoc.DocumentNode.SelectNodes("//div[contains(@class, 'c-toggle__movie-item')]");
                 if (movieNodes != null)
                 {
-                    foreach (var mNode in movieNodes)
+                    foreach (var movieNode in movieNodes)
                     {
-                        var title = mNode.InnerText.Trim();
-                        // Filter strict: Title > 2 chars, not "Seans", and perhaps ensure it's not a generic link
-                        if (!string.IsNullOrWhiteSpace(title) && title.Length > 2 && !title.Contains("Seans", StringComparison.OrdinalIgnoreCase))
+                        var titleNode = movieNode.SelectSingleNode(".//div[contains(@class, 'c-session__hours')]//h3/a");
+                        var genreNode = movieNode.SelectSingleNode(".//p[contains(@class, 'c-session__movie-class')]");
+                        
+                        var title = titleNode?.InnerText?.Trim();
+                        if (string.IsNullOrWhiteSpace(title)) continue;
+                        
+                        title = System.Net.WebUtility.HtmlDecode(title);
+                        var genre = genreNode?.InnerText?.Trim();
+                        if (!string.IsNullOrWhiteSpace(genre))
                         {
-                            title = System.Net.WebUtility.HtmlDecode(title);
-                            foundMovies.Add(title);
-                            _logger.LogInformation($"Film bulundu: {title}");
+                            genre = System.Net.WebUtility.HtmlDecode(genre);
                         }
+
+                        // Sessions
+                        var sessionTypeNodes = movieNode.SelectNodes(".//div[contains(@class, 'c-session__movie-type')]");
+                        var sessionsBuilder = new StringBuilder();
+
+                        if (sessionTypeNodes != null)
+                        {
+                            foreach (var typeNode in sessionTypeNodes)
+                            {
+                                var headerNode = typeNode.SelectSingleNode(".//div[contains(@class, 'c-session__movie-type-header')]");
+                                var hourNodes = typeNode.SelectNodes(".//span[contains(@class, 'c-session__hour')]");
+                                
+                                var header = headerNode?.InnerText?.Trim();
+                                if (!string.IsNullOrWhiteSpace(header))
+                                {
+                                    header = System.Net.WebUtility.HtmlDecode(header);
+                                }
+
+                                if (hourNodes != null)
+                                {
+                                    var hours = hourNodes.Select(h => h.InnerText.Trim()).Where(h => !string.IsNullOrWhiteSpace(h));
+                                    if (hours.Any())
+                                    {
+                                        if (sessionsBuilder.Length > 0) sessionsBuilder.Append(" | ");
+                                        sessionsBuilder.Append($"{header}: {string.Join(", ", hours)}");
+                                    }
+                                }
+                            }
+                        }
+
+                        var movieInfo = $"🎬 {title}";
+                        if (!string.IsNullOrWhiteSpace(genre))
+                        {
+                            movieInfo += $" ({genre})";
+                        }
+                        
+                        if (sessionsBuilder.Length > 0)
+                        {
+                            movieInfo += $"\n   🕒 {sessionsBuilder}";
+                        }
+                        
+                        foundMovies.Add(movieInfo);
+                        _logger.LogInformation($"Film bulundu: {title}");
                     }
                 }
             }
@@ -57,6 +105,6 @@ public class MovieService
             _logger.LogError(ex, "Filmler taranırken hata oluştu.");
         }
 
-        return foundMovies.ToList();
+        return foundMovies;
     }
 }
