@@ -18,7 +18,7 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Initial notification
-        await _telegramService.SendNotificationAsync("🎬 Sinema Elazığ Botu Başlatıldı! 'Jujutsu Kaisen: Execution' bekleniyor...");
+        await _telegramService.SendNotificationAsync("🎬 Sinema Elazığ Botu Başlatıldı! Takip edilen filmler bekleniyor...");
 
         // Run immediately once
         await CheckAndNotify(stoppingToken);
@@ -42,7 +42,7 @@ public class Worker : BackgroundService
 
     private async Task CheckAndNotify(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("'Jujutsu Kaisen: Execution' kontrol ediliyor: {time}", DateTimeOffset.Now);
+        _logger.LogInformation("Takip edilen filmler kontrol ediliyor: {time}", DateTimeOffset.Now);
 
         var movies = await _movieService.GetMoviesInElazigAsync();
 
@@ -53,7 +53,7 @@ public class Worker : BackgroundService
         }
         else
         {
-            _logger.LogInformation("'Jujutsu Kaisen: Execution' henüz vizyonda değil.");
+            _logger.LogInformation("Takip edilen filmler henüz vizyonda değil.");
             // Notify user even if empty? Maybe not for specific tracking, but let's keep it minimal or remove "not found" spam if desired.
             // User request implies strict tracking. Let's send a keep-alive message rarely or just log.
             // But preserving original behavior:

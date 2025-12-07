@@ -1,6 +1,7 @@
 using HtmlAgilityPack;
 using System.Text;
 using System;
+using System.Linq;
 
 namespace CinemaNotifier.Worker;
 
@@ -9,6 +10,10 @@ public class MovieService
     private readonly HttpClient _httpClient;
     private readonly ILogger<MovieService> _logger;
     private const string BaseUrl = "https://boxofficeturkiye.com";
+    private readonly List<string> _followList = new()
+    {
+        "Jujutsu Kaisen: Execution"
+    };
 
     public MovieService(ILogger<MovieService> logger)
     {
@@ -46,8 +51,8 @@ public class MovieService
                         
                         title = System.Net.WebUtility.HtmlDecode(title);
                         
-                        // Feature: Sadece belirli filmi takip et
-                        if (!title.Contains("Jujutsu Kaisen: Execution", StringComparison.OrdinalIgnoreCase))
+                        // Feature: Takip listesi filtresi
+                        if (!_followList.Any(f => title.Contains(f, StringComparison.OrdinalIgnoreCase)))
                         {
                              continue;
                         }
