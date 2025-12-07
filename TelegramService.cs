@@ -12,7 +12,7 @@ public class TelegramService
     {
         _logger = logger;
         var token = configuration["Telegram:BotToken"];
-        _targetChatId = configuration["Telegram:TargetChatId"];
+        _targetChatId = configuration["Telegram:ChatId"] ?? configuration["Telegram:TargetChatId"];
 
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(_targetChatId))
         {

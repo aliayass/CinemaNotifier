@@ -26,10 +26,12 @@ public class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.Now;
-            var nextRun = GetNextRunTime(now);
-            var delay = nextRun - now;
+            var intervalMinutes = _configuration.GetValue<int?>("CheckIntervalMinutes") 
+                                  ?? _configuration.GetValue<int?>("WorkerSettings:CheckIntervalMinutes") 
+                                  ?? 10;
+            var delay = TimeSpan.FromMinutes(intervalMinutes);
 
-            _logger.LogInformation($"Bir sonraki kontrol zamanı: {nextRun}");
+            _logger.LogInformation($"Bir sonraki kontrol zamanı: {DateTime.Now.Add(delay)}");
             await Task.Delay(delay, stoppingToken);
 
             if (stoppingToken.IsCancellationRequested) break;
@@ -57,17 +59,5 @@ public class Worker : BackgroundService
         }
     }
 
-    private DateTime GetNextRunTime(DateTime fromTime)
-    {
-        var runTimes = new[]
-        {
-            fromTime.Date.AddHours(12), // Today 12:00
-            fromTime.Date.AddHours(16), // Today 16:00
-            fromTime.Date.AddDays(1).AddHours(12), // Tomorrow 12:00
-            fromTime.Date.AddDays(1).AddHours(16) // Tomorrow 16:00
-        };
 
-        // Return the first time in the list that is later than now
-        return runTimes.Where(t => t > fromTime).OrderBy(t => t).First();
-    }
 }
