@@ -1,3 +1,9 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CinemaNotifier.Worker;
 

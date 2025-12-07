@@ -1,5 +1,6 @@
 using HtmlAgilityPack;
 using System.Text;
+using System;
 
 namespace CinemaNotifier.Worker;
 
@@ -44,6 +45,13 @@ public class MovieService
                         if (string.IsNullOrWhiteSpace(title)) continue;
                         
                         title = System.Net.WebUtility.HtmlDecode(title);
+                        
+                        // Feature: Sadece belirli filmi takip et
+                        if (!title.Contains("Jujutsu Kaisen: Execution", StringComparison.OrdinalIgnoreCase))
+                        {
+                             continue;
+                        }
+
                         var genre = genreNode?.InnerText?.Trim();
                         if (!string.IsNullOrWhiteSpace(genre))
                         {
